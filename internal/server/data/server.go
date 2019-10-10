@@ -51,3 +51,29 @@ func setHeader(res http.ResponseWriter, req *http.Request) {
 	}
 	res.WriteHeader(http.StatusOK)
 }
+
+func setCookie(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	hID := vars["handler_id"]
+	key := vars["key"]
+
+	value, _ := ioutil.ReadAll(req.Body)
+	cookieValue := string(value)
+
+	cookie := http.Cookie{
+		Name:  key,
+		Value: cookieValue,
+	}
+
+	var operation HandlerFunction = func(m *model.Handler) error {
+		http.SetCookie(m.Writer, &cookie)
+		return nil
+	}
+
+	err := WriteSafe(hID, operation)
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	res.WriteHeader(http.StatusOK)
+}
