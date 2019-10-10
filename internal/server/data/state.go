@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/BBVA/kapow/internal/server/model"
@@ -46,4 +47,31 @@ func (shm *safeHandlerMap) ListIDs() (ids []string) {
 		ids = append(ids, id)
 	}
 	return
+}
+
+//TODO: Test this mess
+type HandlerFunction func(*model.Handler) error
+
+func (shm *safeHandlerMap) ReadSafe(id string, f HandlerFunction) error {
+	shm.m.RLock()
+	defer shm.m.RUnlock()
+
+	return mapOp(shm, id, f)
+}
+
+//TODO: Test this mess
+func (shm *safeHandlerMap) WriteSafe(id string, f HandlerFunction) error {
+	shm.m.Lock()
+	defer shm.m.Unlock()
+
+	return mapOp(shm, id, f)
+}
+
+func mapOp(shm *safeHandlerMap, id string, f HandlerFunction) error {
+	h, ok := shm.hs[id]
+	if !ok {
+		return errors.New("no handler found")
+	}
+
+	return f(h)
 }

@@ -1,52 +1,53 @@
 package data
 
 import (
+	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/BBVA/kapow/internal/server/model"
 	"github.com/gorilla/mux"
 )
 
-// Rutas a registrar:
-// /handlers/{handler_id}/{resource_path}/request GET
-// /handlers/{handler_id}/{resource_path}/response PUT
-//func configRouter() *mux.Router {
-//	r := mux.NewRouter()
-//
-//	r.HandleFunc("/handlers/{handler_id}/response/headers/", updateResource).Methods("PUT")
-//	r.HandleFunc("/handlers/{handler_id}/response/headers/{key}", updateResource).Methods("PUT")
-//	return r
-//}
-//
-//func Run(bindAddr string) {
-//	r := configRouter()
-//
-//	log.Fatal(http.ListenAndServe(bindAddr, r))
-//}
-//
-//func readResource(res http.ResponseWriter, req *http.Request) {
-//
-//}
+var WriteSafe func(string, HandlerFunction) error = Handlers.WriteSafe
 
-var getHandlerId func(string) (*model.Handler, bool) = Handlers.Get
-
-func updateResource(res http.ResponseWriter, req *http.Request) {
+func setStatus(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	hID := vars["handler_id"]
 
-	if _, ok := getHandlerId(hID); !ok {
-		res.WriteHeader(http.StatusNotFound)
+	value, _ := ioutil.ReadAll(req.Body)
+	status, _ := strconv.Atoi(string(value))
+
+	var operation HandlerFunction = func(m *model.Handler) error {
+		m.Writer.WriteHeader(status)
+		return nil
+	}
+
+	err := WriteSafe(hID, operation)
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	res.WriteHeader(http.StatusOK)
+}
 
-	if resource := vars["resource"]; resource == "response/headers" || resource == "response/cookies" {
-		res.WriteHeader(http.StatusBadRequest)
+func setHeader(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	hID := vars["handler_id"]
+	key := vars["key"]
+
+	value, _ := ioutil.ReadAll(req.Body)
+	header := string(value)
+
+	var operation HandlerFunction = func(m *model.Handler) error {
+		m.Writer.Header().Set(key, header)
+		return nil
 	}
 
+	err := WriteSafe(hID, operation)
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	res.WriteHeader(http.StatusOK)
-	//
-	//if _, ok := vars["key"]; !ok {
-	//	res.WriteHeader(http.StatusBadRequest)
-	//	return
-	//}
 }
