@@ -11,19 +11,17 @@ import (
 )
 
 var WriteSafe func(string, HandlerFunction) error = Handlers.WriteSafe
+var hasID func(string) bool = Handlers.Has
 
-func setStatus(res http.ResponseWriter, req *http.Request) {
+func performWriteSafeOperation(res http.ResponseWriter, req *http.Request, operation HandlerFunction) {
 	vars := mux.Vars(req)
+
 	hID := vars["handler_id"]
-
-	value, _ := ioutil.ReadAll(req.Body)
-	status, _ := strconv.Atoi(string(value))
-
-	var operation HandlerFunction = func(m *model.Handler) error {
-		m.Writer.WriteHeader(status)
-		return nil
+	has := hasID(hID)
+	if !has {
+		res.WriteHeader(http.StatusNotFound)
+		return
 	}
-
 	err := WriteSafe(hID, operation)
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
@@ -32,9 +30,20 @@ func setStatus(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusOK)
 }
 
+func setStatus(res http.ResponseWriter, req *http.Request) {
+	value, _ := ioutil.ReadAll(req.Body)
+	status, _ := strconv.Atoi(string(value))
+
+	var operation HandlerFunction = func(m *model.Handler) error {
+		m.Writer.WriteHeader(status)
+		return nil
+	}
+
+	performWriteSafeOperation(res, req, operation)
+}
+
 func setHeader(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	hID := vars["handler_id"]
 	key := vars["key"]
 
 	value, _ := ioutil.ReadAll(req.Body)
@@ -45,17 +54,11 @@ func setHeader(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	err := WriteSafe(hID, operation)
-	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	res.WriteHeader(http.StatusOK)
+	performWriteSafeOperation(res, req, operation)
 }
 
 func setCookie(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	hID := vars["handler_id"]
 	key := vars["key"]
 
 	value, _ := ioutil.ReadAll(req.Body)
@@ -71,27 +74,14 @@ func setCookie(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	err := WriteSafe(hID, operation)
-	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	res.WriteHeader(http.StatusOK)
+	performWriteSafeOperation(res, req, operation)
 }
 
 func setBody(res http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-	hID := vars["handler_id"]
-
 	var operation HandlerFunction = func(m *model.Handler) error {
-		io.Copy(m.Writer, req.Body)
-		return nil
+		_, err := io.Copy(m.Writer, req.Body)
+		return err
 	}
 
-	err := WriteSafe(hID, operation)
-	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	res.WriteHeader(http.StatusOK)
+	performWriteSafeOperation(res, req, operation)
 }

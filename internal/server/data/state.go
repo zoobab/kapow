@@ -75,3 +75,11 @@ func mapOp(shm *safeHandlerMap, id string, f HandlerFunction) error {
 
 	return f(h)
 }
+
+//TODO: Test this mess
+func (shm *safeHandlerMap) Has(id string) bool {
+	shm.m.RLock()
+	defer shm.m.RUnlock()
+	_, ok := shm.hs[id]
+	return ok
+}

@@ -12,6 +12,32 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//FIXME: it's not good override and don't restore thins
+
+//Right now we test performWriteSafeOperation here so... refactor?
+func TestSetStatusNotFounWhenInvalidID(t *testing.T) {
+	request := httptest.NewRequest(http.MethodPut, "/handlers/HAND/response/status", strings.NewReader("404"))
+	response := httptest.NewRecorder()
+	handler := mux.NewRouter()
+	handler.HandleFunc("/handlers/{handler_id}/response/status", setStatus).Methods("PUT")
+
+	hasID = func(id string) bool {
+		return id == "HANDLER_XXXXXXXXXX"
+	}
+
+	WriteSafe = func(id string, f HandlerFunction) error {
+		if id == "HANDLER_XXXXXXXXXX" {
+			return nil
+		}
+		return errors.New("id not found")
+	}
+
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusNotFound {
+		t.Errorf("HTTP Status mismatch. Expected: %d, got: %d", http.StatusNotFound, response.Code)
+	}
+}
+
 func TestSetStatus(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPut, "/handlers/HANDLER_XXXXXXXXXX/response/status", strings.NewReader("404"))
 	response := httptest.NewRecorder()
@@ -22,6 +48,10 @@ func TestSetStatus(t *testing.T) {
 	myHandler := &model.Handler{
 		ID:     "HANDLER_XXXXXXXXXX",
 		Writer: handlerResponse,
+	}
+
+	hasID = func(id string) bool {
+		return id == "HANDLER_XXXXXXXXXX"
 	}
 
 	WriteSafe = func(id string, f HandlerFunction) error {
@@ -51,6 +81,10 @@ func TestSetHeader(t *testing.T) {
 	myHandler := &model.Handler{
 		ID:     "HANDLER_XXXXXXXXXX",
 		Writer: handlerResponse,
+	}
+
+	hasID = func(id string) bool {
+		return id == "HANDLER_XXXXXXXXXX"
 	}
 
 	WriteSafe = func(id string, f HandlerFunction) error {
@@ -83,6 +117,10 @@ func TestSetCookie(t *testing.T) {
 		Writer: handlerResponse,
 	}
 
+	hasID = func(id string) bool {
+		return id == "HANDLER_XXXXXXXXXX"
+	}
+
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
@@ -113,6 +151,10 @@ func TestSetBody(t *testing.T) {
 	myHandler := &model.Handler{
 		ID:     "HANDLER_XXXXXXXXXX",
 		Writer: handlerResponse,
+	}
+
+	hasID = func(id string) bool {
+		return id == "HANDLER_XXXXXXXXXX"
 	}
 
 	WriteSafe = func(id string, f HandlerFunction) error {
