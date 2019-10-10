@@ -1,6 +1,7 @@
 package data
 
 import (
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -67,6 +68,23 @@ func setCookie(res http.ResponseWriter, req *http.Request) {
 
 	var operation HandlerFunction = func(m *model.Handler) error {
 		http.SetCookie(m.Writer, &cookie)
+		return nil
+	}
+
+	err := WriteSafe(hID, operation)
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	res.WriteHeader(http.StatusOK)
+}
+
+func setBody(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	hID := vars["handler_id"]
+
+	var operation HandlerFunction = func(m *model.Handler) error {
+		io.Copy(m.Writer, req.Body)
 		return nil
 	}
 
