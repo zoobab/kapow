@@ -129,7 +129,7 @@ func getForm(res http.ResponseWriter, req *http.Request) {
 
 func getBody(res http.ResponseWriter, req *http.Request) {
 	var operation HandlerFunction = func(m *model.Handler) error {
-		io.Copy(res, m.Request.Body)
+		_, _ = io.Copy(res, m.Request.Body)
 		return nil
 	}
 
