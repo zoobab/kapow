@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/BBVA/kapow/internal/server/model"
@@ -283,6 +284,46 @@ func TestGetForm(t *testing.T) {
 	fakeRequest.Form = url.Values{}
 	fakeRequest.Form.Add("foo", "bar")
 	fakeRequest.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	disposableResponse := httptest.NewRecorder()
+	handler.ServeHTTP(disposableResponse, fakeRequest)
+
+	myHandler := &model.Handler{
+		ID:      "HANDLER_XXXXXXXXXX",
+		Request: handlerRequest,
+	}
+
+	ReadSafe = func(id string, f HandlerFunction) error {
+		if id == myHandler.ID {
+			return f(myHandler)
+		}
+		return errors.New("id not found")
+	}
+
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Errorf("HTTP Status mismatch. Expected: %d, got: %d", http.StatusOK, response.Code)
+	}
+
+	responseBytes, _ := ioutil.ReadAll(response.Body)
+	retrieved := string(responseBytes)
+	if retrieved != "bar" {
+		t.Errorf("Param mistmatch. Expected: %s, got: %s", "bar", retrieved)
+	}
+}
+
+func TestGetBody(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "/handlers/HANDLER_XXXXXXXXXX/request/body", nil)
+	response := httptest.NewRecorder()
+	handler := mux.NewRouter()
+	handler.HandleFunc("/handlers/{handler_id}/request/body", getBody).Methods("GET")
+
+	var handlerRequest *http.Request
+	johnSnowFunc := func(res http.ResponseWriter, req *http.Request) {
+		handlerRequest = req
+	}
+	handler.HandleFunc("/foo", johnSnowFunc).Methods("POST")
+	fakeRequest := httptest.NewRequest(http.MethodPost, "/foo", strings.NewReader("bar"))
 
 	disposableResponse := httptest.NewRecorder()
 	handler.ServeHTTP(disposableResponse, fakeRequest)

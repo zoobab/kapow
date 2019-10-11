@@ -1,6 +1,7 @@
 package data
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/BBVA/kapow/internal/server/model"
@@ -124,4 +125,13 @@ func getForm(res http.ResponseWriter, req *http.Request) {
 	_ = performReadSafeOperation(res, req, operation)
 
 	_, _ = res.Write([]byte(value))
+}
+
+func getBody(res http.ResponseWriter, req *http.Request) {
+	var operation HandlerFunction = func(m *model.Handler) error {
+		io.Copy(res, m.Request.Body)
+		return nil
+	}
+
+	_ = performReadSafeOperation(res, req, operation)
 }
