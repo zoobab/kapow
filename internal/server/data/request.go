@@ -66,3 +66,48 @@ func getMatches(res http.ResponseWriter, req *http.Request) {
 
 	_, _ = res.Write([]byte(value))
 }
+
+func getParams(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	key := vars["key"]
+	var value string
+	var operation HandlerFunction = func(m *model.Handler) error {
+		value = m.Request.FormValue(key)
+		return nil
+	}
+
+	_ = performReadSafeOperation(res, req, operation)
+
+	_, _ = res.Write([]byte(value))
+}
+
+func getHeader(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	key := vars["key"]
+	var value string
+	var operation HandlerFunction = func(m *model.Handler) error {
+		value = m.Request.Header.Get(key)
+		return nil
+	}
+
+	_ = performReadSafeOperation(res, req, operation)
+
+	_, _ = res.Write([]byte(value))
+}
+
+func getCookies(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	key := vars["key"]
+	var value string
+	var operation HandlerFunction = func(m *model.Handler) error {
+		cookie, _ := m.Request.Cookie(key)
+		if cookie.Name == key {
+			value = cookie.Value
+		}
+		return nil
+	}
+
+	_ = performReadSafeOperation(res, req, operation)
+
+	_, _ = res.Write([]byte(value))
+}
