@@ -1,7 +1,6 @@
 package data
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/BBVA/kapow/internal/server/model"
@@ -10,6 +9,12 @@ import (
 
 var ReadSafe func(string, HandlerFunction) error = Handlers.ReadSafe
 
+func performReadSafeOperation(res http.ResponseWriter, req *http.Request, operation HandlerFunction) error {
+	vars := mux.Vars(req)
+	hID := vars["handler_id"]
+	return ReadSafe(hID, operation)
+}
+
 func getStatus(res http.ResponseWriter, req *http.Request) {
 	var method string
 	var operation HandlerFunction = func(m *model.Handler) error {
@@ -17,16 +22,12 @@ func getStatus(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	vars := mux.Vars(req)
-	hID := vars["handler_id"]
-	err := ReadSafe(hID, operation)
-	if err != nil {
-		fmt.Println(err)
-	}
+	_ = performReadSafeOperation(res, req, operation)
 
 	_, _ = res.Write([]byte(method))
 }
 
+// TODO: check on real world where is the correct value
 func getHost(res http.ResponseWriter, req *http.Request) {
 	var host string
 	var operation HandlerFunction = func(m *model.Handler) error {
@@ -34,12 +35,34 @@ func getHost(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	vars := mux.Vars(req)
-	hID := vars["handler_id"]
-	err := ReadSafe(hID, operation)
-	if err != nil {
-		fmt.Println(err)
-	}
+	_ = performReadSafeOperation(res, req, operation)
 
 	_, _ = res.Write([]byte(host))
+}
+
+func getPath(res http.ResponseWriter, req *http.Request) {
+	var path string
+	var operation HandlerFunction = func(m *model.Handler) error {
+		path = m.Request.URL.EscapedPath()
+		return nil
+	}
+
+	_ = performReadSafeOperation(res, req, operation)
+
+	_, _ = res.Write([]byte(path))
+}
+
+func getMatches(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	key := vars["key"]
+	var value string
+	var operation HandlerFunction = func(m *model.Handler) error {
+		opVars := mux.Vars(m.Request)
+		value = opVars[key]
+		return nil
+	}
+
+	_ = performReadSafeOperation(res, req, operation)
+
+	_, _ = res.Write([]byte(value))
 }
