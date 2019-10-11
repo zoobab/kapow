@@ -111,3 +111,17 @@ func getCookies(res http.ResponseWriter, req *http.Request) {
 
 	_, _ = res.Write([]byte(value))
 }
+
+func getForm(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	key := vars["key"]
+	var value string
+	var operation HandlerFunction = func(m *model.Handler) error {
+		value = m.Request.FormValue(key)
+		return nil
+	}
+
+	_ = performReadSafeOperation(res, req, operation)
+
+	_, _ = res.Write([]byte(value))
+}

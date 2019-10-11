@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/BBVA/kapow/internal/server/model"
@@ -239,6 +240,50 @@ func TestGetCookies(t *testing.T) {
 		Value: "bar",
 	}
 	fakeRequest.AddCookie(c)
+	disposableResponse := httptest.NewRecorder()
+	handler.ServeHTTP(disposableResponse, fakeRequest)
+
+	myHandler := &model.Handler{
+		ID:      "HANDLER_XXXXXXXXXX",
+		Request: handlerRequest,
+	}
+
+	ReadSafe = func(id string, f HandlerFunction) error {
+		if id == myHandler.ID {
+			return f(myHandler)
+		}
+		return errors.New("id not found")
+	}
+
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Errorf("HTTP Status mismatch. Expected: %d, got: %d", http.StatusOK, response.Code)
+	}
+
+	responseBytes, _ := ioutil.ReadAll(response.Body)
+	retrieved := string(responseBytes)
+	if retrieved != "bar" {
+		t.Errorf("Param mistmatch. Expected: %s, got: %s", "bar", retrieved)
+	}
+}
+
+func TestGetForm(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "/handlers/HANDLER_XXXXXXXXXX/request/form/foo", nil)
+	response := httptest.NewRecorder()
+	handler := mux.NewRouter()
+	handler.HandleFunc("/handlers/{handler_id}/request/form/{key}", getForm).Methods("GET")
+
+	var handlerRequest *http.Request
+	johnSnowFunc := func(res http.ResponseWriter, req *http.Request) {
+		handlerRequest = req
+	}
+	handler.HandleFunc("/foo", johnSnowFunc).Methods("GET")
+	fakeRequest := httptest.NewRequest(http.MethodGet, "/foo", nil)
+
+	fakeRequest.Form = url.Values{}
+	fakeRequest.Form.Add("foo", "bar")
+	fakeRequest.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
 	disposableResponse := httptest.NewRecorder()
 	handler.ServeHTTP(disposableResponse, fakeRequest)
 
