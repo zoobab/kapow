@@ -29,12 +29,16 @@ func TestSetStatusNotFounWhenInvalidID(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalWriteSafe := WriteSafe
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == "HANDLER_XXXXXXXXXX" {
 			return nil
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		WriteSafe = originalWriteSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusNotFound {
@@ -62,12 +66,16 @@ func TestSetStatus(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalWriteSafe := WriteSafe
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		WriteSafe = originalWriteSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -99,12 +107,16 @@ func TestSetHeader(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalWriteSafe := WriteSafe
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		WriteSafe = originalWriteSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -137,12 +149,16 @@ func TestSetCookie(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalWriteSafe := WriteSafe
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		WriteSafe = originalWriteSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -177,12 +193,16 @@ func TestSetBody(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalWriteSafe := WriteSafe
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		WriteSafe = originalWriteSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {

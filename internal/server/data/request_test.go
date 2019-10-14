@@ -62,12 +62,16 @@ func TestGetMethod(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -101,12 +105,16 @@ func TestGetHost(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -140,12 +148,16 @@ func TestGetPath(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -187,12 +199,16 @@ func TestGetMatches(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -234,12 +250,16 @@ func TestGetParams(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -282,12 +302,16 @@ func TestGetHeaders(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -334,12 +358,16 @@ func TestGetCookies(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -386,12 +414,16 @@ func TestGetForm(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -434,12 +466,16 @@ func TestGetBody(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -496,12 +532,16 @@ func TestGetFilename(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -558,12 +598,16 @@ func TestGetFile(t *testing.T) {
 		hasID = originalHasID
 	}()
 
+	originalReadSafe := ReadSafe
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
 		}
 		return errors.New("id not found")
 	}
+	defer func() {
+		ReadSafe = originalReadSafe
+	}()
 
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
