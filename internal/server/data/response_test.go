@@ -21,9 +21,13 @@ func TestSetStatusNotFounWhenInvalidID(t *testing.T) {
 	handler := mux.NewRouter()
 	handler.HandleFunc("/handlers/{handler_id}/response/status", setStatus).Methods("PUT")
 
+	originalHasID := hasID
 	hasID = func(id string) bool {
 		return id == "HANDLER_XXXXXXXXXX"
 	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == "HANDLER_XXXXXXXXXX" {
@@ -50,9 +54,13 @@ func TestSetStatus(t *testing.T) {
 		Writer: handlerResponse,
 	}
 
+	originalHasID := hasID
 	hasID = func(id string) bool {
 		return id == "HANDLER_XXXXXXXXXX"
 	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
@@ -83,9 +91,13 @@ func TestSetHeader(t *testing.T) {
 		Writer: handlerResponse,
 	}
 
+	originalHasID := hasID
 	hasID = func(id string) bool {
 		return id == "HANDLER_XXXXXXXXXX"
 	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
@@ -117,9 +129,13 @@ func TestSetCookie(t *testing.T) {
 		Writer: handlerResponse,
 	}
 
+	originalHasID := hasID
 	hasID = func(id string) bool {
 		return id == "HANDLER_XXXXXXXXXX"
 	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
@@ -153,9 +169,13 @@ func TestSetBody(t *testing.T) {
 		Writer: handlerResponse,
 	}
 
+	originalHasID := hasID
 	hasID = func(id string) bool {
 		return id == "HANDLER_XXXXXXXXXX"
 	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	WriteSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
