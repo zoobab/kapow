@@ -16,6 +16,32 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func TestNoIDFound(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "/handlers/HANDLER_XXXXXXXX/request/method", nil)
+	response := httptest.NewRecorder()
+	handler := mux.NewRouter()
+	handler.HandleFunc("/handlers/{handler_id}/request/method", getStatus).Methods("GET")
+
+	handlerRequest := httptest.NewRequest(http.MethodGet, "/foo/bar", nil)
+	myHandler := &model.Handler{
+		ID:      "HANDLER_XXXXXXXXXX",
+		Request: handlerRequest,
+	}
+
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
+
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusNotFound {
+		t.Errorf("HTTP Status mismatch. Expected: %d, got: %d", http.StatusNotFound, response.Code)
+	}
+}
+
 func TestGetMethod(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/handlers/HANDLER_XXXXXXXXXX/request/method", nil)
 	response := httptest.NewRecorder()
@@ -27,6 +53,14 @@ func TestGetMethod(t *testing.T) {
 		ID:      "HANDLER_XXXXXXXXXX",
 		Request: handlerRequest,
 	}
+
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
@@ -59,6 +93,14 @@ func TestGetHost(t *testing.T) {
 		Request: handlerRequest,
 	}
 
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
+
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
@@ -89,6 +131,14 @@ func TestGetPath(t *testing.T) {
 		ID:      "HANDLER_XXXXXXXXXX",
 		Request: handlerRequest,
 	}
+
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
@@ -129,6 +179,14 @@ func TestGetMatches(t *testing.T) {
 		Request: handlerRequest,
 	}
 
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
+
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
@@ -167,6 +225,14 @@ func TestGetParams(t *testing.T) {
 		ID:      "HANDLER_XXXXXXXXXX",
 		Request: handlerRequest,
 	}
+
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
@@ -207,6 +273,14 @@ func TestGetHeaders(t *testing.T) {
 		ID:      "HANDLER_XXXXXXXXXX",
 		Request: handlerRequest,
 	}
+
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
@@ -252,6 +326,14 @@ func TestGetCookies(t *testing.T) {
 		Request: handlerRequest,
 	}
 
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
+
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
@@ -296,6 +378,14 @@ func TestGetForm(t *testing.T) {
 		Request: handlerRequest,
 	}
 
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
+
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
@@ -335,6 +425,14 @@ func TestGetBody(t *testing.T) {
 		ID:      "HANDLER_XXXXXXXXXX",
 		Request: handlerRequest,
 	}
+
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
@@ -390,6 +488,14 @@ func TestGetFilename(t *testing.T) {
 		Request: handlerRequest,
 	}
 
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
+
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {
 			return f(myHandler)
@@ -443,6 +549,14 @@ func TestGetFile(t *testing.T) {
 		ID:      "HANDLER_XXXXXXXXXX",
 		Request: handlerRequest,
 	}
+
+	originalHasID := hasID
+	hasID = func(id string) bool {
+		return id == myHandler.ID
+	}
+	defer func() {
+		hasID = originalHasID
+	}()
 
 	ReadSafe = func(id string, f HandlerFunction) error {
 		if id == myHandler.ID {

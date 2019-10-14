@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"io"
 	"net/http"
 
@@ -10,9 +11,15 @@ import (
 
 var ReadSafe func(string, HandlerFunction) error = Handlers.ReadSafe
 
+// performReadSafeOperation only return error when ID not found
 func performReadSafeOperation(res http.ResponseWriter, req *http.Request, operation HandlerFunction) error {
 	vars := mux.Vars(req)
 	hID := vars["handler_id"]
+	has := hasID(hID)
+	if !has {
+		res.WriteHeader(http.StatusNotFound)
+		return errors.New("Id Not Found")
+	}
 	return ReadSafe(hID, operation)
 }
 
@@ -23,7 +30,10 @@ func getStatus(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 
 	_, _ = res.Write([]byte(method))
 }
@@ -36,7 +46,10 @@ func getHost(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 
 	_, _ = res.Write([]byte(host))
 }
@@ -48,7 +61,10 @@ func getPath(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 
 	_, _ = res.Write([]byte(path))
 }
@@ -63,7 +79,10 @@ func getMatches(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 
 	_, _ = res.Write([]byte(value))
 }
@@ -77,7 +96,10 @@ func getParams(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 
 	_, _ = res.Write([]byte(value))
 }
@@ -91,7 +113,10 @@ func getHeader(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 
 	_, _ = res.Write([]byte(value))
 }
@@ -108,7 +133,10 @@ func getCookies(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 
 	_, _ = res.Write([]byte(value))
 }
@@ -122,7 +150,10 @@ func getForm(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 
 	_, _ = res.Write([]byte(value))
 }
@@ -133,7 +164,10 @@ func getBody(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 }
 
 func getFileName(res http.ResponseWriter, req *http.Request) {
@@ -148,7 +182,10 @@ func getFileName(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 
 	_, _ = res.Write([]byte(filename))
 }
@@ -165,5 +202,8 @@ func getFileContent(res http.ResponseWriter, req *http.Request) {
 		return nil
 	}
 
-	_ = performReadSafeOperation(res, req, operation)
+	err := performReadSafeOperation(res, req, operation)
+	if err != nil {
+		return
+	}
 }
