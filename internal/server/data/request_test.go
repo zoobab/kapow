@@ -1,8 +1,11 @@
 package data
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -349,5 +352,59 @@ func TestGetBody(t *testing.T) {
 	retrieved := string(responseBytes)
 	if retrieved != "bar" {
 		t.Errorf("Param mistmatch. Expected: %s, got: %s", "bar", retrieved)
+	}
+}
+
+func TestGetFilename(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "/handlers/HANDLER_XXXXXXXXXX/request/files/john/filename", nil)
+	response := httptest.NewRecorder()
+	handler := mux.NewRouter()
+	handler.HandleFunc("/handlers/{handler_id}/request/files/{file}/filename", getFileName).Methods("GET")
+
+	var handlerRequest *http.Request
+	johnSnowFunc := func(res http.ResponseWriter, req *http.Request) {
+		handlerRequest = req
+	}
+	handler.HandleFunc("/upload", johnSnowFunc).Methods("POST")
+
+	//file upload body
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("john", "/tmp/foo.txt")
+	if err != nil {
+		t.FailNow()
+	}
+	_, err = io.Copy(part, strings.NewReader("bar"))
+	if err != nil {
+		t.FailNow()
+	}
+	writer.Close()
+	fakeRequest := httptest.NewRequest(http.MethodPost, "/upload", body)
+	fakeRequest.Header.Add("Content-Type", writer.FormDataContentType())
+
+	disposableResponse := httptest.NewRecorder()
+	handler.ServeHTTP(disposableResponse, fakeRequest)
+
+	myHandler := &model.Handler{
+		ID:      "HANDLER_XXXXXXXXXX",
+		Request: handlerRequest,
+	}
+
+	ReadSafe = func(id string, f HandlerFunction) error {
+		if id == myHandler.ID {
+			return f(myHandler)
+		}
+		return errors.New("id not found")
+	}
+
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Errorf("HTTP Status mismatch. Expected: %d, got: %d", http.StatusOK, response.Code)
+	}
+
+	responseBytes, _ := ioutil.ReadAll(response.Body)
+	retrieved := string(responseBytes)
+	if retrieved != "/tmp/foo.txt" {
+		t.Errorf("Filename mistmatch. Expected: %s, got: %s", "/tmp/foo.txt", retrieved)
 	}
 }

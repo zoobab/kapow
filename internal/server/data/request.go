@@ -135,3 +135,20 @@ func getBody(res http.ResponseWriter, req *http.Request) {
 
 	_ = performReadSafeOperation(res, req, operation)
 }
+
+func getFileName(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	theFile := vars["file"]
+	var filename string
+	var operation HandlerFunction = func(m *model.Handler) error {
+		r := m.Request
+		_ = r.ParseMultipartForm(10 << 20)
+		_, handler, _ := r.FormFile(theFile)
+		filename = handler.Filename
+		return nil
+	}
+
+	_ = performReadSafeOperation(res, req, operation)
+
+	_, _ = res.Write([]byte(filename))
+}
