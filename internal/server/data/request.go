@@ -152,3 +152,18 @@ func getFileName(res http.ResponseWriter, req *http.Request) {
 
 	_, _ = res.Write([]byte(filename))
 }
+
+func getFileContent(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	theFile := vars["file"]
+	var operation HandlerFunction = func(m *model.Handler) error {
+		r := m.Request
+		_ = r.ParseMultipartForm(10 << 20)
+		file, _, _ := r.FormFile(theFile)
+
+		_, _ = io.Copy(res, file)
+		return nil
+	}
+
+	_ = performReadSafeOperation(res, req, operation)
+}
