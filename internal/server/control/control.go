@@ -93,23 +93,23 @@ func addRoute(res http.ResponseWriter, req *http.Request) {
 	payload, _ := ioutil.ReadAll(req.Body)
 	err := json.Unmarshal(payload, &route)
 	if err != nil {
-		res.WriteHeader(http.StatusBadRequest)
+		http.Error(res, "Malformed JSON", http.StatusBadRequest)
 		return
 	}
 
 	if route.Method == "" {
-		res.WriteHeader(http.StatusUnprocessableEntity)
+		http.Error(res, "Invalid Route", http.StatusUnprocessableEntity)
 		return
 	}
 
 	if route.Pattern == "" {
-		res.WriteHeader(http.StatusUnprocessableEntity)
+		http.Error(res, "Invalid Route", http.StatusUnprocessableEntity)
 		return
 	}
 
 	err = pathValidator(route.Pattern)
 	if err != nil {
-		res.WriteHeader(http.StatusUnprocessableEntity)
+		http.Error(res, "Invalid Route", http.StatusUnprocessableEntity)
 		return
 	}
 

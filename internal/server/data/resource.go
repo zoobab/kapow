@@ -64,7 +64,7 @@ func getRequestMatches(w http.ResponseWriter, r *http.Request, h *model.Handler)
 	if value, ok := vars[name]; ok {
 		_, _ = w.Write([]byte(value))
 	} else {
-		w.WriteHeader(http.StatusNotFound)
+		http.Error(w, "Resource Item Not Found", http.StatusNotFound)
 	}
 }
 

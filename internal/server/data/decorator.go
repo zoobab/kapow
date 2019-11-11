@@ -39,7 +39,7 @@ func checkHandler(fn resourceHandler) func(http.ResponseWriter, *http.Request) {
 		if h, ok := Handlers.Get(handlerID); ok {
 			fn(w, r, h)
 		} else {
-			w.WriteHeader(http.StatusNotFound)
+			http.Error(w, "Handler ID Not Found", http.StatusNotFound)
 		}
 	}
 }
