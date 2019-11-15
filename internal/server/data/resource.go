@@ -58,13 +58,13 @@ func getRequestPath(w http.ResponseWriter, r *http.Request, h *model.Handler) {
 }
 
 func getRequestMatches(w http.ResponseWriter, r *http.Request, h *model.Handler) {
-	w.Header().Add("Content-Type", "application/octet-stream")
 	name := mux.Vars(r)["name"]
 	vars := mux.Vars(h.Request)
 	if value, ok := vars[name]; ok {
+		w.Header().Add("Content-Type", "application/octet-stream")
 		_, _ = w.Write([]byte(value))
 	} else {
-		http.Error(w, "Resource Item Not Found", http.StatusNotFound)
+		writeError(w, errorResourceItemNotFound, http.StatusNotFound)
 	}
 }
 
@@ -74,7 +74,7 @@ func getRequestParams(w http.ResponseWriter, r *http.Request, h *model.Handler) 
 	if values, ok := h.Request.URL.Query()[name]; ok {
 		_, _ = w.Write([]byte(values[0]))
 	} else {
-		w.WriteHeader(http.StatusNotFound)
+		writeError(w, errorResourceItemNotFound, http.StatusNotFound)
 	}
 }
 
@@ -94,6 +94,7 @@ func getRequestCookies(w http.ResponseWriter, r *http.Request, h *model.Handler)
 	if cookie, err := h.Request.Cookie(name); err == nil {
 		_, _ = w.Write([]byte(cookie.Value))
 	} else {
+		// TODO: reason
 		w.WriteHeader(http.StatusNotFound)
 	}
 }

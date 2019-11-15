@@ -52,7 +52,7 @@ func removeRoute(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
 	if err := funcRemove(id); err != nil {
-		res.WriteHeader(http.StatusNotFound)
+		writeError(res, errorRouteNotFound, http.StatusNotFound)
 		return
 	}
 
@@ -93,26 +93,27 @@ func addRoute(res http.ResponseWriter, req *http.Request) {
 	payload, _ := ioutil.ReadAll(req.Body)
 	err := json.Unmarshal(payload, &route)
 	if err != nil {
-		http.Error(res, "Malformed JSON", http.StatusBadRequest)
+		writeError(res, errorMalformedJSON, http.StatusBadRequest)
 		return
 	}
 
 	if route.Method == "" {
-		http.Error(res, "Invalid Route", http.StatusUnprocessableEntity)
+		writeError(res, errorInvalidRoute, http.StatusUnprocessableEntity)
 		return
 	}
 
 	if route.Pattern == "" {
-		http.Error(res, "Invalid Route", http.StatusUnprocessableEntity)
+		writeError(res, errorInvalidRoute, http.StatusUnprocessableEntity)
 		return
 	}
 
 	err = pathValidator(route.Pattern)
 	if err != nil {
-		http.Error(res, "Invalid Route", http.StatusUnprocessableEntity)
+		writeError(res, errorInvalidRoute, http.StatusUnprocessableEntity)
 		return
 	}
 
+	// TODO: reason
 	id, err := idGenerator()
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
@@ -137,7 +138,7 @@ var funcGet func(string) (model.Route, error) = user.Routes.Get
 func getRoute(res http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	if r, err := funcGet(id); err != nil {
-		res.WriteHeader(http.StatusNotFound)
+		writeError(res, errorRouteNotFound, http.StatusNotFound)
 	} else {
 		res.Header().Set("Content-Type", "application/json")
 		rBytes, _ := json.Marshal(r)
