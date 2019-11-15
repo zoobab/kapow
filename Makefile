@@ -42,7 +42,10 @@ install: build
 	CGO_ENABLED=0 go install ./...
 
 acceptance: install
-	make -C ./spec/test
+	make -C ./spec/test test
+
+acceptance-fix: install
+	make -C ./spec/test fix
 
 deps:
 	@echo "deps here"
