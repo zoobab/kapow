@@ -1,3 +1,4 @@
+[![noswpatv3](http://zoobab.wdfiles.com/local--files/start/noupcv3.jpg)](https://ffii.org/donate-now-to-save-europe-from-software-patents-says-ffii/)
 <p align="center">
   <img alt="Kapow! Logo" src="https://raw.githubusercontent.com/BBVA/kapow/master/docs/source/_static/logo.png" width=300 />
   <h3 align="center">If you can script it, you can HTTP it.</h3>
